@@ -12,6 +12,11 @@ const got = require('got')
 const { CookieJar, Cookie } = require('tough-cookie')
 const { promisify } = require('util')
 
+const {
+  SOSWRAP_UNSCOPED_TOKEN,
+  SOSWRAP_SCOPED_TOKEN,
+} = process.env
+
 class SamlOpenstackWrapper{
   constructor({
     idPName,    // cscskc
@@ -58,11 +63,19 @@ class SamlOpenstackWrapper{
     }
   }
 
+  async validateUnscopedToken(){
+
+  }
+
   async getUnscopedToken(){
+
+    if (SOSWRAP_UNSCOPED_TOKEN) return SOSWRAP_UNSCOPED_TOKEN
 
     this.checkUnscopedPrereq()
 
-    const resp = await got(`${filterTrailingSlash(this.authUrl)}OS-FEDERATION/identity_providers/${this.idPName}/protocols/${this.idPProto}/auth`, {
+    const authUrl = `${filterTrailingSlash(this.authUrl)}OS-FEDERATION/identity_providers/${this.idPName}/protocols/${this.idPProto}/auth`
+
+    const resp = await got(authUrl, {
       agent: false,
       method: 'GET',
       headers: {
@@ -73,16 +86,18 @@ class SamlOpenstackWrapper{
     const { body } = resp
 
     const headerProg = /<\w+:Header.*?<\/\w+:Header>/
+    const idpRequestBody = body.replace(headerProg, '')
+
+    const basicAuthb64 = Buffer.from(`${this.username}:${this.password}`).toString('base64')
 
     const resp2 = await got(this.idPUrl, {
       agent: false,
       method: 'POST',
-      username: this.username,
-      password: this.password,
       headers: {
-        'content-type': 'text/xml'
+        'Content-type': 'text/xml',
+        Authorization: `Basic ${basicAuthb64}`
       },
-      body: body.replace(headerProg, ''),
+      body: idpRequestBody,
     })
 
     const { body: body2, headers: headers2 } = resp2
@@ -132,6 +147,9 @@ class SamlOpenstackWrapper{
     if (!unscoped) {
       throw new HttpHeaderMissingError(`x-subject-token missing in header`)
     }
+
+    this.unscopedToken = unscoped
+    
     return unscoped
   }
 
@@ -139,6 +157,8 @@ class SamlOpenstackWrapper{
     const pId = projectId || this.projectId
     if (!pId) throw new ParameterMissingError(`getScopedToken requires either object argument with projectId as key value or this.projectId to be set`)
     if (!this.authUrl) throw new ParameterMissingError(`getScopedToken requires this.authUrl to be set`)
+
+    if (SOSWRAP_SCOPED_TOKEN) return SOSWRAP_SCOPED_TOKEN
     const token = await this.getUnscopedToken()
     const payload = {
       auth: {
@@ -168,8 +188,9 @@ class SamlOpenstackWrapper{
     if (!resp.headers['x-subject-token']) {
       throw new HeaderMissionError(`x-subject-token missing header`)
     }
+    this.scopedToken = resp.headers['x-subject-token']
   
-    return resp.headers['x-subject-token']
+    return this.scopedToken
   }
 
   async useProject(projectId) {

@@ -36,6 +36,7 @@ module.exports = {
   filterTrailingSlash,
   XMLError,
   HttpError,
+  ParameterMissingError,
   HttpHeaderMissingError,
   HttpStatusError,
   NotYetImplementedError

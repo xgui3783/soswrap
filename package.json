@@ -1,11 +1,9 @@
 {
   "name": "soswrap",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simple wrapper around saml2 authentication on openstack",
   "main": "index.js",
-  "scripts": {
-    
-  },
+  "scripts": {},
   "keywords": [
     "openstack",
     "saml2",
@@ -16,5 +14,8 @@
   "dependencies": {
     "got": "^10.7.0",
     "tough-cookie": "^3.0.1"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0"
   }
 }
