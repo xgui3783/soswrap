@@ -1,6 +1,6 @@
 {
   "name": "soswrap",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simple wrapper around saml2 authentication on openstack",
   "main": "index.js",
   "scripts": {},
@@ -9,7 +9,7 @@
     "saml2",
     "nodejs"
   ],
-  "author": "Xiao Gui <xgui@gmail.com>",
+  "author": "Xiao Gui <xgui3783@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "got": "^10.7.0",
@@ -17,5 +17,13 @@
   },
   "devDependencies": {
     "dotenv": "^8.2.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xgui3783/soswrap.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xgui3783/soswrap/issues"
+  },
+  "homepage": "https://github.com/xgui3783/soswrap#readme"
 }
